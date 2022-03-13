@@ -146,7 +146,6 @@ int BinarySearch(T arr[], int size, T target)
         {
             counter++;
             found = true;
-            break;
         }
         else if (arr[mid] > target)
         {
