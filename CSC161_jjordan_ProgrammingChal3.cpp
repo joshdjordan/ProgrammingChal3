@@ -7,7 +7,7 @@ the program will randomize both arrays using the "rand()" function. From there t
 using quick sort and array 2 is sorted using selection. A counter will need to be created and implemented for each comparrison to count to compare the two
 different methods. On completion of the program the difference in the two comparrisons will be displayed deeming one more efficient.
 
-NOTES: first series of issues is writing up the quick sort. most issues are related to recursion and overall syntax on how it's supposed to be written.
+NOTES: few errors currently - mostly with attempting to add a counter throughout the multiple quick sort functions.
 */
 
 #include <iostream>
@@ -26,7 +26,7 @@ void swap(T arr[], int first, int second)
 
 void PopulateAndRNG(int arr[], int size)
 {
-    int temp, RandNum;
+    int RandNum;
 
     srand(time(0));
     for (int i = 0; i < size; i++)
@@ -42,38 +42,53 @@ void PopulateAndRNG(int arr[], int size)
     }
 }
 
-/// COPIED FORM SLIDES - NEEDS DIAGNOSIS FOR PERSONAL //
+// copied form slides - needs diagnosis for personal //
+template <class T>
+int partition(T arr[], int first, int last)
+{
+    T pivot;
+    int SmallIndex;
+    // QuickCounter = 0;
 
-//template <class T>
-//int partition(T arr[], int first, int last)
-//{
-//    T pivot;
-//    int SmallIndex;
-//
-//    swap(arr, first, (first + last) / 2);
-//
-//    pivot = arr[first];
-//    SmallIndex = first;
-//
-//    for (int i = first + 1; i <= last; i++)
-//    {
-//        if (list[i] < pivot)
-//        {
-//            SmallIndex++;
-//            swap(arr, SmallIndex, i);
-//        }
-//    }
-//    swap(arr, first, SmallIndex);;
-//
-//    return SmallIndex;
-//}
+    // swaps pivot to the front of array //
+    swap(arr, first, (first + last) / 2);
+
+    pivot = arr[first]; // sets pivot to the number in index 0 //
+    SmallIndex = first; // sets the 'SmallIndex' to index 0 //
+
+    // iterates through the array 1 - 99 //
+    for (int i = first + 1; i <= last; i++)
+    {
+        if (arr[i] < pivot)
+        {
+            SmallIndex++;
+            swap(arr, SmallIndex, i);
+            // QuickCounter++;
+        }
+        // QuickCounter++;
+    }
+    swap(arr, first, SmallIndex); // swaps the pivot with whatever the small index is //
+
+    return SmallIndex;
+}
 
 template <class T>
-int QuickSort(T arr[], int size)
+void recursion_QuickSort(T arr[], int first, int last) // NEEDS ATTENTION FOR COUNTER //
 {
-    int counter = 0;
+    int pivot;
 
+    if (first < last)
+    {
+        pivot = partition(arr, first, last);
+        recursion_QuickSort(arr, first, pivot - 1);
+        recursion_QuickSort(arr, pivot + 1, last);
+    }
+}
 
+template <class T>
+void QuickSort(T arr[], int size)
+{
+   recursion_QuickSort(arr, 0, size - 1); // NEEDS ATTENTION //
 }
 
 // Selection Sort - finds the lowest number in the array and moves it to the front... continues this until array is sorted //
@@ -85,11 +100,12 @@ int SelectionSort(T arr[], int size)
     for (int i = 0; i < size; i++)
     {
         int MinIndex = i;
+        // iterate through the array //
         for (int j = i + 1; j < size; j++)
         {
-            if (arr[j] < arr[MinIndex])
+            if (arr[j] < arr[MinIndex]) // finding the smallest element //
             {
-                MinIndex = j;
+                MinIndex = j; // replacing the current 'MinIndex' with the index of 'j' //
                 counter++;
             }
         }
@@ -110,7 +126,7 @@ void PrintArray(int arr[], int size)
 
 int main()
 {
-    int QuickCounter, SelectionCounter;
+    int /*QuickCounter*/ SelectionCounter;
     int const size = 100;
     int QuickSortArr[size], SelectionSortArr[size];
 
@@ -121,8 +137,10 @@ int main()
     PopulateAndRNG(SelectionSortArr, size);
     
     std::cout << "\n----- Quick Sorted Array -----\n";
-    //QuickCounter = QuickSort(QuickSortArr, size);
-    //PrintArray(QuickSortArr, size);
+    QuickSort(QuickSortArr, size);
+    PrintArray(QuickSortArr, size);
+
+    // std::cout << "Comparrisons: " << QuickCounter << std::endl;
 
     std::cout << "\n----- Selection Sorted Array -----\n";
     SelectionCounter = SelectionSort(SelectionSortArr, size);
