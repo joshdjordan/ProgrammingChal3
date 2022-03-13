@@ -7,7 +7,8 @@ the program will randomize both arrays using the "rand()" function. From there t
 using quick sort and array 2 is sorted using selection. A counter will need to be created and implemented for each comparrison to count to compare the two
 different methods. On completion of the program the difference in the two comparrisons will be displayed deeming one more efficient.
 
-NOTES: few errors currently - mostly with attempting to add a counter throughout the multiple quick sort functions.
+NOTES: When I first added my final 1000 item array to my main for the search algo's I was given a green swigly underneath main suggesting to move some stuff
+to heap. I dont quite recall if that was a stack overflow issue or what it what. 
 */
 
 #include <iostream>
@@ -29,12 +30,15 @@ void PopulateAndRNG(int arr[], int size)
     int RandNum;
 
     srand(time(0));
+
+    // populate array from 1 - size //
     for (int i = 0; i < size; i++)
     {
         arr[i] = i + 1;
     }
     std::cout << std::endl;
 
+    // interate through the loop one item at a time swapping its current number with a random index //
     for (int i = 0; i < size; i++)
     {
         RandNum = rand() % 100;
@@ -42,13 +46,11 @@ void PopulateAndRNG(int arr[], int size)
     }
 }
 
-// copied form slides - needs diagnosis for personal //
 template <class T>
-int partition(T arr[], int first, int last)
+int partition(T arr[], int first, int last, int &QuickCounter)
 {
     T pivot;
-    int SmallIndex;
-    // QuickCounter = 0;
+    int SmallIndex;;
 
     // swaps pivot to the front of array //
     swap(arr, first, (first + last) / 2);
@@ -59,13 +61,12 @@ int partition(T arr[], int first, int last)
     // iterates through the array 1 - 99 //
     for (int i = first + 1; i <= last; i++)
     {
+        QuickCounter++;
         if (arr[i] < pivot)
         {
             SmallIndex++;
             swap(arr, SmallIndex, i);
-            // QuickCounter++;
         }
-        // QuickCounter++;
     }
     swap(arr, first, SmallIndex); // swaps the pivot with whatever the small index is //
 
@@ -73,22 +74,23 @@ int partition(T arr[], int first, int last)
 }
 
 template <class T>
-void recursion_QuickSort(T arr[], int first, int last) // NEEDS ATTENTION FOR COUNTER //
+void recursion_QuickSort(T arr[], int first, int last, int &QuickCounter)
 {
     int pivot;
 
     if (first < last)
     {
-        pivot = partition(arr, first, last);
-        recursion_QuickSort(arr, first, pivot - 1);
-        recursion_QuickSort(arr, pivot + 1, last);
+        QuickCounter++;
+        pivot = partition(arr, first, last, QuickCounter);
+        recursion_QuickSort(arr, first, pivot - 1, QuickCounter);
+        recursion_QuickSort(arr, pivot + 1, last, QuickCounter);
     }
 }
 
 template <class T>
-void QuickSort(T arr[], int size)
+void QuickSort(T arr[], int size, int &QuickCounter)
 {
-   recursion_QuickSort(arr, 0, size - 1); // NEEDS ATTENTION //
+   recursion_QuickSort(arr, 0, size - 1, QuickCounter);
 }
 
 // Selection Sort - finds the lowest number in the array and moves it to the front... continues this until array is sorted //
@@ -103,10 +105,10 @@ int SelectionSort(T arr[], int size)
         // iterate through the array //
         for (int j = i + 1; j < size; j++)
         {
+            counter++;
             if (arr[j] < arr[MinIndex]) // finding the smallest element //
             {
                 MinIndex = j; // replacing the current 'MinIndex' with the index of 'j' //
-                counter++;
             }
         }
         swap(arr, i, MinIndex);
@@ -114,39 +116,89 @@ int SelectionSort(T arr[], int size)
     return counter;
 }
 
-void PrintArray(int arr[], int size)
+template <class T>
+int SequentialSearch(T arr[], int size, T target)
 {
+    int counter = 0;
 
     for (int i = 0; i < size; i++)
     {
-        std::cout << arr[i] << ' ';
+        counter++;
+        if (arr[i] == target)
+        {
+            break;
+        }
     }
-    std::cout << std::endl;
+    return counter;
+}
+
+template <class T>
+int BinarySearch(T arr[], int size, T target)
+{
+    int mid;
+    int counter = 0, first = 0, last = size - 1;
+    bool found = false;
+
+    while (first <= last && !found)
+    {
+        mid = (first + last) / 2;
+        if (arr[mid] == target)
+        {
+            counter++;
+            found = true;
+            break;
+        }
+        else if (arr[mid] > target)
+        {
+            counter++;
+            last = mid - 1;
+        }
+        else
+        {
+            counter++;
+            first = mid + 1;
+        }
+    }
+    return counter;
 }
 
 int main()
 {
-    int /*QuickCounter*/ SelectionCounter;
-    int const size = 100;
+    int QuickTotal = 0, SelectionTotal = 0, SequentialTotal = 0, BinaryTotal = 0;
+    int const size = 100, TestAmount = 100;
+    int SelectionCounter = 0, QuickCounter = 0, SequentialCounter = 0, BinaryCounter = 0;
     int QuickSortArr[size], SelectionSortArr[size];
+    int SearchArr[1000];
 
-    PopulateAndRNG(QuickSortArr, size);
-    std::cout << "----- Randomized Arrays -----\n";
-    PrintArray(QuickSortArr, size);
+    for (int i = 0; i < TestAmount; i++)
+    {
+        PopulateAndRNG(QuickSortArr, size);
+        QuickSort(QuickSortArr, size, QuickCounter);
+        QuickTotal += QuickCounter;
+        QuickCounter = 0;
 
-    PopulateAndRNG(SelectionSortArr, size);
-    
-    std::cout << "\n----- Quick Sorted Array -----\n";
-    QuickSort(QuickSortArr, size);
-    PrintArray(QuickSortArr, size);
+        PopulateAndRNG(SelectionSortArr, size);
+        SelectionCounter = SelectionSort(SelectionSortArr, size);
+        SelectionTotal += SelectionCounter;
+        SelectionCounter = 0;
+    }
+    std::cout << "Average Quick Sort Comparison's: " << QuickTotal / TestAmount << std::endl;
+    std::cout << "Average Selection Sort Comparison's: " << SelectionTotal / TestAmount << std::endl;
 
-    // std::cout << "Comparrisons: " << QuickCounter << std::endl;
+    for (int i = 0; i < 1000; i++)
+    {
+        SearchArr[i] = i + 1;
+    }
+    for (int i = 0; i < 1000; i++)
+    {
+        SequentialCounter = SequentialSearch(SearchArr, 1000, i);
+        SequentialTotal += SequentialCounter;
 
-    std::cout << "\n----- Selection Sorted Array -----\n";
-    SelectionCounter = SelectionSort(SelectionSortArr, size);
-    PrintArray(SelectionSortArr, size);
-
-    std::cout << "Comparrisons: " << SelectionCounter << std::endl;
+        BinaryCounter = BinarySearch(SearchArr, 1000, i);
+        BinaryTotal += BinaryCounter;
+    }
+    std::cout << "Average Sequential Search Comparison's: " << SequentialTotal / 1000 << std::endl;
+    std::cout << "Average Binary Search Comparison's: " << BinaryTotal / 1000 << std::endl;
 
     return 0;
 }
