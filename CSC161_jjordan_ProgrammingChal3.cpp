@@ -58,7 +58,7 @@ int partition(T arr[], int first, int last, int &QuickCounter)
     pivot = arr[first]; // sets pivot to the number in index 0 //
     SmallIndex = first; // sets the 'SmallIndex' to index 0 //
 
-    // iterates through the array 1 - 99 //
+    // iterates through the array 1 - 100 //
     for (int i = first + 1; i <= last; i++)
     {
         QuickCounter++;
